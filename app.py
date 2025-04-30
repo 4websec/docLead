@@ -7,28 +7,27 @@ def load_data():
     df = pd.read_csv("scored_physicians.csv")
     df['license_states'] = df['license_states'].astype(str)
     df['locum_keywords'] = df['locum_keywords'].astype(str)
+    df['license_states_list'] = df['license_states'].fillna('').apply(
+        lambda x: [s.strip() for s in x.split(',') if s.strip()]
+    )
     return df
 
 df = load_data()
-# Normalize license_states column into lists
-df['license_states_list'] = df['license_states'].fillna('').apply(lambda x: [s.strip() for s in x.split(',') if s.strip()])
 
 # --- Sidebar Filters ---
 st.sidebar.title("🔍 Recruiter Filters")
-# State filter
-# Unique license states
-all_states = sorted(set(state for sublist in df['license_states_list'] for state in sublist))
-selected_states = st.sidebar.multiselect("Filter by License State(s)", all_states, default=all_states)
 
-# Filter: Keep rows licensed in any of the selected states
+# State filter
+all_states = sorted(set(state for sublist in df['license_states_list'] for state in sublist))
+selected_states = st.sidebar.multiselect("Filter by License State(s)", options=all_states, default=all_states)
 df = df[df['license_states_list'].apply(lambda states: any(s in selected_states for s in states))]
 
+# Additional filters
 active_only = st.sidebar.checkbox("Show Active Only", True)
 multi_state_only = st.sidebar.checkbox("Show Multi-State Licensed Only")
 locum_only = st.sidebar.checkbox("Show Locum Candidates Only")
 min_score = st.sidebar.slider("Minimum Recruiter Score", 0, 100, 20)
 
-# --- Apply Filters ---
 if active_only:
     df = df[df['status'] == 'ACTIVE']
 if multi_state_only:
@@ -41,8 +40,7 @@ df = df[df['recruiter_priority_score'] >= min_score]
 st.title("🏥 Physician Lead Platform")
 st.caption("Curated and scored for recruiter targeting")
 
-st.markdown(
-    """
+st.markdown("""
 <style>
     .big-font { font-size: 18px !important; font-weight: bold; }
     .stDataFrame thead tr th { background-color: #f4f4f4; }
@@ -61,9 +59,9 @@ st.markdown("### 📋 Physician Leads")
 
 # Highlight high-score rows
 def color_score(val):
-    if val >= 80: return 'background-color: #c8e6c9'  # green
-    elif val >= 50: return 'background-color: #fff9c4'  # yellow
-    else: return 'background-color: #ffcdd2'  # red
+    if val >= 80: return 'background-color: #c8e6c9'
+    elif val >= 50: return 'background-color: #fff9c4'
+    else: return 'background-color: #ffcdd2'
 
 styled_df = df.style.applymap(color_score, subset=["recruiter_priority_score"])
 st.dataframe(styled_df, use_container_width=True, hide_index=True)
