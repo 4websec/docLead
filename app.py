@@ -199,10 +199,9 @@ st.markdown("© 2025 Landon Mayo. All rights reserved.")
 
 import streamlit.components.v1 as components
 
+import streamlit.components.v1 as components
+
 components.html("""
-<style>
-#chatra { bottom: auto !important; top: 20px !important; right: 20px !important; }
-</style>
 <script>
 (function(d, w, c) {
     w.ChatraID = 'kTDcPP2zG6v5BekLG';
