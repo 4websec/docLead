@@ -145,7 +145,8 @@ if "flagged" not in st.session_state:
     st.session_state.flagged = {}
 
 # --- Header ---
-st.title("🩺 MVP Solution for NorTek Medical")
+st.title("🩺 DocHunter - Recruiter Intelligence Dashboard")
+st.markdown("*Developed by Landon Mayo*")
 st.markdown("*Developed by Landon Mayo*")
 st.caption("Curated and scored for recruiter targeting")
 
@@ -191,5 +192,6 @@ if st.session_state.flagged:
 
 # --- Footer ---
 st.markdown("---")
-st.markdown("© 2024 Landon Mayo. All rights reserved.")
-st.markdown("🔧 Built with ❤️ by the DocLeader Team. Contact [support@docleader.com](mailto:support@docleader.com) for access.")
+st.markdown("© 2025 Landon Mayo. All rights reserved.")
+st.markdown("🔧 Built with ❤️ by Landon Mayo. Contact [support@dochunter.ai](mailto:support@dochunter.ai) for access.")
+st.markdown("© 2025 Landon Mayo. All rights reserved.")
