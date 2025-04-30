@@ -57,8 +57,8 @@ with st.sidebar.expander("🎯 License State Filter", expanded=False):
     )
     df = df[df['license_states_list'].explode().isin(selected_states).groupby(level=0).any()]
 
-# 📚 Practice Area Filter
-available_specialties = sorted(df['primary_specialty'].dropna().unique().tolist())
+    # 📚 Practice Area Filter
+    available_specialties = sorted(df['primary_specialty'].dropna().unique().tolist())
 default_index = 0
 if "Emergency Medicine" in available_specialties:
     default_index = available_specialties.index("Emergency Medicine")
@@ -70,12 +70,12 @@ selected_specialty = st.sidebar.selectbox(
 )
 
 with st.sidebar.expander("⚙️ Advanced Filters", expanded=False):
-active_only = st.checkbox("Show Active Only", value=True, key="filter_active")
-multi_state_only = st.checkbox("Show Multi-State Licensed Only", key="filter_multi_state")
-locum_only = st.checkbox("Show Locum Candidates Only", key="filter_locum")
-min_score = st.slider("Minimum Recruiter Score", 0, 100, 20, key="score_slider")
+    active_only = st.checkbox("Show Active Only", value=True, key="active_filter")
+    multi_state_only = st.checkbox("Show Multi-State Licensed Only", key="multi_state_filter")
+    locum_only = st.checkbox("Show Locum Candidates Only", key="locum_filter")
+    min_score = st.slider("Minimum Recruiter Score", 0, 100, 20, key="score_slider")
 
-if active_only:
+    if active_only:
     df = df[df['status'] == 'ACTIVE']
 if multi_state_only:
     df = df[df['multi_state_licensed'] == True]
