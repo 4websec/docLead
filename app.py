@@ -29,6 +29,59 @@ df_full = load_data()
 df = df_full.copy()
 
 # --- Sidebar UI ---
+# Inject Bootstrap-inspired styling
+st.markdown("""
+    <style>
+    html, body, [class*="css"] {
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .stExpander {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 1em;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 1em;
+    }
+
+    .stTextArea > div > textarea {
+        border-radius: 6px !important;
+        padding: 10px !important;
+        font-size: 0.95em !important;
+    }
+
+    .stButton > button {
+        border-radius: 6px;
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: white;
+        font-weight: 500;
+        transition: 0.3s ease;
+    }
+
+    .stButton > button:hover {
+        background-color: #0056b3;
+        color: white;
+    }
+
+    .stDownloadButton > button {
+        background-color: #28a745;
+        color: white;
+        font-weight: bold;
+        border-radius: 6px;
+        padding: 10px 18px;
+    }
+
+    .stDownloadButton > button:hover {
+        background-color: #218838;
+        color: white;
+    }
+
+    .stDataFrame {
+        border-radius: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 st.sidebar.title("🔍 Recruiter Filters")
 dark_mode = st.sidebar.checkbox("🌙 Enable Dark Mode")
 
@@ -92,7 +145,8 @@ if "flagged" not in st.session_state:
     st.session_state.flagged = {}
 
 # --- Header ---
-st.title("🏥 Physician Lead Platform")
+st.title("🩺 MVP Solution for NorTek Medical")
+st.markdown("*Developed by Landon Mayo*")
 st.caption("Curated and scored for recruiter targeting")
 
 # --- Metrics ---
@@ -137,4 +191,5 @@ if st.session_state.flagged:
 
 # --- Footer ---
 st.markdown("---")
+st.markdown("© 2024 Landon Mayo. All rights reserved.")
 st.markdown("🔧 Built with ❤️ by the DocLeader Team. Contact [support@docleader.com](mailto:support@docleader.com) for access.")
