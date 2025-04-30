@@ -17,16 +17,22 @@ df = load_data()
 # --- Sidebar Filters ---
 st.sidebar.title("🔍 Recruiter Filters")
 
-# State filter
-all_states = sorted(set(state for sublist in df['license_states_list'] for state in sublist))
-selected_states = st.sidebar.multiselect("Filter by License State(s)", options=all_states, default=all_states)
-df = df[df['license_states_list'].apply(lambda states: any(s in selected_states for s in states))]
+with st.sidebar.expander("🎯 License State Filter", expanded=False):
+    all_states = sorted(set(state for sublist in df['license_states_list'] for state in sublist))
+    selected_states = st.multiselect(
+        "Select state(s) licensed in:",
+        options=all_states,
+        default=all_states,
+        key="license_state_filter"
+    )
+    df = df[df['license_states_list'].apply(lambda states: any(s in selected_states for s in states))]
 
 # Additional filters
-active_only = st.sidebar.checkbox("Show Active Only", True)
-multi_state_only = st.sidebar.checkbox("Show Multi-State Licensed Only")
-locum_only = st.sidebar.checkbox("Show Locum Candidates Only")
-min_score = st.sidebar.slider("Minimum Recruiter Score", 0, 100, 20)
+with st.sidebar.expander("⚙️ Advanced Filters", expanded=False):
+    active_only = st.checkbox("Show Active Only", True)
+    multi_state_only = st.checkbox("Show Multi-State Licensed Only")
+    locum_only = st.checkbox("Show Locum Candidates Only")
+    min_score = st.slider("Minimum Recruiter Score", 0, 100, 20)
 
 if active_only:
     df = df[df['status'] == 'ACTIVE']
@@ -57,7 +63,6 @@ col3.metric("🩺 Locum Candidates", df['locum_candidate_flag'].sum())
 # --- Table Display ---
 st.markdown("### 📋 Physician Leads")
 
-# Highlight high-score rows
 def color_score(val):
     if val >= 80: return 'background-color: #c8e6c9'
     elif val >= 50: return 'background-color: #fff9c4'
