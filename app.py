@@ -194,3 +194,20 @@ st.markdown("---")
 st.markdown("© 2025 Landon Mayo. All rights reserved.")
 st.markdown("🔧 Built with ❤️ by Landon Mayo. Contact [support@dochunter.ai](mailto:support@dochunter.ai) for access.")
 st.markdown("© 2025 Landon Mayo. All rights reserved.")
+
+st.markdown("""
+<!-- Chatra {literal} -->
+<script>
+    (function(d, w, c) {
+        w.ChatraID = 'kTDcPP2zG6v5BekLG';
+        var s = d.createElement('script');
+        w[c] = w[c] || function() {
+            (w[c].q = w[c].q || []).push(arguments);
+        };
+        s.async = true;
+        s.src = 'https://call.chatra.io/chatra.js';
+        if (d.head) d.head.appendChild(s);
+    })(document, window, 'Chatra');
+</script>
+<!-- /Chatra {/literal} -->
+""", unsafe_allow_html=True)
