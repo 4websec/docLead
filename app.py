@@ -145,8 +145,7 @@ if "flagged" not in st.session_state:
     st.session_state.flagged = {}
 
 # --- Header ---
-st.title("🩺 DocHunter - Recruiter Intelligence Dashboard")
-st.markdown("*Developed by Landon Mayo*")
+st.title("DocHunter – Recruiter Intelligence Dashboard")
 st.markdown("*Developed by Landon Mayo*")
 st.caption("Curated and scored for recruiter targeting")
 
