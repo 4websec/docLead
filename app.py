@@ -10,9 +10,19 @@ def load_data():
     return df
 
 df = load_data()
+# Normalize license_states column into lists
+df['license_states_list'] = df['license_states'].fillna('').apply(lambda x: [s.strip() for s in x.split(',') if s.strip()])
 
 # --- Sidebar Filters ---
 st.sidebar.title("🔍 Recruiter Filters")
+# State filter
+# Unique license states
+all_states = sorted(set(state for sublist in df['license_states_list'] for state in sublist))
+selected_states = st.sidebar.multiselect("Filter by License State(s)", all_states, default=all_states)
+
+# Filter: Keep rows licensed in any of the selected states
+df = df[df['license_states_list'].apply(lambda states: any(s in selected_states for s in states))]
+
 active_only = st.sidebar.checkbox("Show Active Only", True)
 multi_state_only = st.sidebar.checkbox("Show Multi-State Licensed Only")
 locum_only = st.sidebar.checkbox("Show Locum Candidates Only")
