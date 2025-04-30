@@ -71,12 +71,12 @@ selected_specialty = st.sidebar.selectbox(
 
 with st.sidebar.expander("⚙️ Advanced Filters", expanded=False):
     active_only = st.checkbox("Show Active Only", True)
-    multi_state_only = st.checkbox("Show Multi-State Licensed Only")
-    locum_only = st.checkbox("Show Locum Candidates Only")
-    min_score = st.slider("Minimum Recruiter Score", 0, 100, 20)
-    multi_state_only = st.checkbox("Show Multi-State Licensed Only")
-    locum_only = st.checkbox("Show Locum Candidates Only")
-    min_score = st.slider("Minimum Recruiter Score", 0, 100, 20)
+multi_state_only = st.checkbox("Show Multi-State Licensed Only", key="multi_state_filter")
+locum_only = st.checkbox("Show Locum Candidates Only", key="locum_filter")
+min_score = st.slider("Minimum Recruiter Score", 0, 100, 20, key="score_slider")
+multi_state_only = st.checkbox("Show Multi-State Licensed Only", key="multi_state_filter")
+locum_only = st.checkbox("Show Locum Candidates Only", key="locum_filter")
+min_score = st.slider("Minimum Recruiter Score", 0, 100, 20, key="score_slider")
 
 if active_only:
     df = df[df['status'] == 'ACTIVE']
