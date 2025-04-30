@@ -1,4 +1,3 @@
-
 import pandas as pd
 import streamlit as st
 
@@ -8,15 +7,14 @@ def load_data():
     try:
         df = pd.read_csv("scored_physicians.csv")
     except FileNotFoundError:
-        st.error("Error: The file 'scored_physicians.csv' was not found.")
+        st.error("Error: The file 'scored_physicians.csv' was not found. Please ensure the file exists in the correct location.")
         st.stop()
     except pd.errors.EmptyDataError:
-        st.error("Error: The file 'scored_physicians.csv' is empty or malformed.")
+        st.error("Error: The file 'scored_physicians.csv' is empty or malformed. Please check the file content.")
         st.stop()
     except Exception as e:
-        st.error(f"Unexpected error loading data: {e}")
+        st.error("An unexpected error occurred while loading the file: {}".format(e))
         st.stop()
-
     df['license_states'] = df['license_states'].astype(str)
     df['locum_keywords'] = df['locum_keywords'].astype(str)
     df['license_states_list'] = df['license_states'].fillna('').apply(
@@ -24,110 +22,58 @@ def load_data():
     )
     return df
 
-# Load full data for dropdown consistency
-df_full = load_data()
-df = df_full.copy()
+# Load data at the start
+df = load_data()
 
-# --- Sidebar UI ---
-# Inject Bootstrap-inspired styling
-st.markdown("""
-    <style>
-    html, body, [class*="css"] {
-        font-family: 'Segoe UI', sans-serif;
-    }
-
-    .stExpander {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 1em;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        margin-bottom: 1em;
-    }
-
-    .stTextArea > div > textarea {
-        border-radius: 6px !important;
-        padding: 10px !important;
-        font-size: 0.95em !important;
-    }
-
-    .stButton > button {
-        border-radius: 6px;
-        padding: 8px 16px;
-        background-color: #007bff;
-        color: white;
-        font-weight: 500;
-        transition: 0.3s ease;
-    }
-
-    .stButton > button:hover {
-        background-color: #0056b3;
-        color: white;
-    }
-
-    .stDownloadButton > button {
-        background-color: #28a745;
-        color: white;
-        font-weight: bold;
-        border-radius: 6px;
-        padding: 10px 18px;
-    }
-
-    .stDownloadButton > button:hover {
-        background-color: #218838;
-        color: white;
-    }
-
-    .stDataFrame {
-        border-radius: 10px;
-    }
-    </style>
-""", unsafe_allow_html=True)
-st.sidebar.title("🔍 Recruiter Filters")
 dark_mode = st.sidebar.checkbox("🌙 Enable Dark Mode")
 
-# Dark Mode Styling
+# --- Initialize session state for flagged candidates ---
+if "flagged" not in st.session_state:
+    st.session_state.flagged = {}
+
+# 🌙 Dark Mode Toggle
+dark_mode = st.sidebar.toggle("🌙 Enable Dark Mode")
+
+# Dark Mode CSS
 if dark_mode:
     st.markdown("""
         <style>
-        html, body, [class*="css"] {
+        html, body, [class*="css"]  {
             background-color: #1e1e1e !important;
             color: #ffffff !important;
         }
-        .stTextInput > div > div > input,
-        .stTextArea textarea {
-            background-color: #2e2e2e !important;
-            color: #ffffff !important;
-        }
-        .stDataFrame, .stExpander {
-            background-color: #262626 !important;
-            color: #ffffff !important;
-        }
+        .stDataFrame { background-color: #262626 !important; }
         </style>
     """, unsafe_allow_html=True)
 
-# License State Filter
+# 🎯 License State Filter
 with st.sidebar.expander("🎯 License State Filter", expanded=False):
     all_states = sorted(set(state for sublist in df['license_states_list'] for state in sublist))
     selected_states = st.multiselect(
         "Select state(s) licensed in:",
         options=all_states,
-        default=all_states
+        default=all_states,
+        key="license_state_filter"
     )
     df = df[df['license_states_list'].explode().isin(selected_states).groupby(level=0).any()]
 
-# Practice Area Filter (based on full dataset)
-available_specialties = sorted(df_full['primary_specialty'].dropna().unique().tolist())
-default_index = available_specialties.index("Emergency Medicine") if "Emergency Medicine" in available_specialties else 0
+# 📚 Practice Area Filter
+available_specialties = sorted(df['primary_specialty'].dropna().unique().tolist())
+default_index = 0
+if "Emergency Medicine" in available_specialties:
+    default_index = available_specialties.index("Emergency Medicine")
+
 selected_specialty = st.sidebar.selectbox(
     "Filter by Practice Area",
     options=available_specialties,
     index=default_index
 )
-df = df[df['primary_specialty'] == selected_specialty]
 
-# Advanced Filters
 with st.sidebar.expander("⚙️ Advanced Filters", expanded=False):
     active_only = st.checkbox("Show Active Only", True)
+    multi_state_only = st.checkbox("Show Multi-State Licensed Only")
+    locum_only = st.checkbox("Show Locum Candidates Only")
+    min_score = st.slider("Minimum Recruiter Score", 0, 100, 20)
     multi_state_only = st.checkbox("Show Multi-State Licensed Only")
     locum_only = st.checkbox("Show Locum Candidates Only")
     min_score = st.slider("Minimum Recruiter Score", 0, 100, 20)
@@ -135,50 +81,45 @@ with st.sidebar.expander("⚙️ Advanced Filters", expanded=False):
 if active_only:
     df = df[df['status'] == 'ACTIVE']
 if multi_state_only:
-    df = df[df['multi_state_licensed']]
+    df = df[df['multi_state_licensed'] == True]
 if locum_only:
-    df = df[df['locum_candidate_flag']]
+    df = df[df['locum_candidate_flag'] == True]
 df = df[df['recruiter_priority_score'] >= min_score]
 
-# --- Session state for flagging ---
-if "flagged" not in st.session_state:
-    st.session_state.flagged = {}
-
 # --- Header ---
-st.title("DocHunter – Recruiter Intelligence Dashboard")
-st.markdown("*Developed by Landon Mayo*")
+st.title("🏥 Physician Lead Platform")
 st.caption("Curated and scored for recruiter targeting")
 
-# --- Metrics ---
+# --- Summary Metrics ---
 col1, col2, col3 = st.columns(3)
 col1.metric("🧾 Total Results", len(df))
 col2.metric("🌍 Multi-State Licensed", df['multi_state_licensed'].sum())
 col3.metric("🩺 Locum Candidates", df['locum_candidate_flag'].sum())
-
-# --- Profile Cards ---
+# --- Table Display + Flag System ---
 st.markdown("### 📋 Physician Leads")
 
 for row in df.itertuples(index=False):
-    with st.expander(f"{row.full_name} | {row.primary_specialty} | Score: {row.recruiter_priority_score}"):
+    with st.expander("{0}  |  {1}  |  Score: {2}".format(row.full_name, row.primary_specialty, row.recruiter_priority_score)):
         col1, col2 = st.columns([3, 1])
         with col1:
-            st.write(f"**NPI**: {row.npi}")
-            st.write(f"**Status**: {row.status}")
-            st.write(f"**Email**: {getattr(row, 'Email', 'N/A')}")
-            st.write(f"**Phone**: {row.phone}")
-            st.write(f"**Practice Address**: {row.practice_address}")
-            st.write(f"**License States**: {row.license_states}")
+            st.write("**NPI**: {}".format(row.npi))
+            st.write("**Status**: {}".format(row.status))
+            st.write("**Phone**: {}".format(row.phone))
+            st.write("**Practice Address**: {}".format(row.practice_address))
+            st.write("**License States**: {}".format(row.license_states))
         with col2:
             current_note = st.session_state.flagged.get(row.npi, "")
-            note = st.text_area("Flag this candidate:", value=current_note, key=f"note_{row.npi}")
+            note = st.text_area("Flag this candidate:", value=current_note, key="note_{}".format(row.npi))
             if note.strip():
                 st.session_state.flagged[row.npi] = note.strip()
+                st.session_state.flagged[row.npi] = note.strip()
 
-# --- Flagged Candidates ---
+# --- Flag Summary and Download ---
 if st.session_state.flagged:
     st.markdown("### 🏷️ Flagged Candidates")
     flagged_data = df[df['npi'].isin(st.session_state.flagged.keys())].copy()
     flagged_data["flag_note"] = flagged_data["npi"].apply(lambda n: st.session_state.flagged.get(n, ""))
+    # Get only columns that exist in the DataFrame
     display_columns = [col for col in ["full_name", "primary_specialty", "license_states", "recruiter_priority_score", "flag_note"] if col in flagged_data.columns]
     st.dataframe(flagged_data[display_columns])
 
@@ -191,41 +132,4 @@ if st.session_state.flagged:
 
 # --- Footer ---
 st.markdown("---")
-st.markdown("© 2025 Landon Mayo. All rights reserved.")
-st.markdown("🔧 Built with ❤️ by Landon Mayo. Contact [support@dochunter.ai](mailto:support@dochunter.ai) for access.")
-st.markdown("© 2025 Landon Mayo. All rights reserved.")
-
-st.markdown("""
-<!-- Chatra {literal} -->
-<script>
-    (function(d, w, c) {
-        w.ChatraID = 'kTDcPP2zG6v5BekLG';
-        var s = d.createElement('script');
-        w[c] = w[c] || function() {
-            (w[c].q = w[c].q || []).push(arguments);
-        };
-        s.async = true;
-        s.src = 'https://call.chatra.io/chatra.js';
-        if (d.head) d.head.appendChild(s);
-    })(document, window, 'Chatra');
-</script>
-<!-- /Chatra {/literal} -->
-""", unsafe_allow_html=True)
-
-
-import streamlit.components.v1 as components
-
-components.html("""
-<script>
-    (function(d, w, c) {
-        w.ChatraID = 'kTDcPP2zG6v5BekLG';
-        var s = d.createElement('script');
-        w[c] = w[c] || function() {
-            (w[c].q = w[c].q || []).push(arguments);
-        };
-        s.async = true;
-        s.src = 'https://call.chatra.io/chatra.js';
-        if (d.head) d.head.appendChild(s);
-    })(document, window, 'Chatra');
-</script>
-""", height=0)
+st.markdown("🔧 Built with ❤️ by the DocLeader Team. Contact [support@docleader.com](mailto:support@docleader.com) for access.")
