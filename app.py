@@ -148,6 +148,28 @@ if dark_mode:
         </style>
     """, unsafe_allow_html=True)
 
+# Sidebar filters
+st.sidebar.header('Filters')
+
+# Simplified specialty filter
+specialty_filter = st.sidebar.radio(
+    'Doctor Type',
+    options=['All Doctors', 'Emergency Room Doctors']
+)
+
+# Apply filters
+def filter_data(df):
+    filtered_df = df.copy()
+    
+    # Apply specialty filter
+    if specialty_filter == 'Emergency Room Doctors':
+        filtered_df = filtered_df[filtered_df['primary_specialty'].str.contains('Emergency', case=False, na=False)]
+    
+    return filtered_df
+
+# Apply filters to dataframe
+df = filter_data(df)
+
 # License State Filter
 with st.sidebar.expander("🎯 License State Filter", expanded=False):
     all_states = sorted(set(state for sublist in df['license_states_list'] for state in sublist))
@@ -157,16 +179,6 @@ with st.sidebar.expander("🎯 License State Filter", expanded=False):
         default=all_states
     )
     df = df[df['license_states_list'].explode().isin(selected_states).groupby(level=0).any()]
-
-# Practice Area Filter (based on full dataset)
-available_specialties = sorted(df_full['primary_specialty'].dropna().unique().tolist())
-default_index = available_specialties.index("Emergency Medicine") if "Emergency Medicine" in available_specialties else 0
-selected_specialty = st.sidebar.selectbox(
-    "Filter by Practice Area",
-    options=available_specialties,
-    index=default_index
-)
-df = df[df['primary_specialty'] == selected_specialty]
 
 # Advanced Filters
 with st.sidebar.expander("⚙️ Advanced Filters", expanded=False):
