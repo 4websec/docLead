@@ -1,10 +1,10 @@
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
+*.csv
 .env
 .venv
 env/
 venv/
 .streamlit/
-*.csv
 .DS_Store
+backup/

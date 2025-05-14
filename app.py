@@ -1,11 +1,43 @@
 import pandas as pd
 import streamlit as st
+import os
+import shutil
+from datetime import datetime
+
+def backup_data():
+    """Create backup of scored_physicians.csv before overwriting"""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    src = "scored_physicians.csv"
+    dst = f"backup/scored_physicians_{timestamp}.csv"
+    
+    # Create backup dir if it doesn't exist
+    os.makedirs("backup", exist_ok=True)
+    
+    # Copy file
+    shutil.copy2(src, dst)
+    return dst
 
 # --- Load Data ---
 @st.cache_data(ttl=3600, max_entries=100)
 def load_data():
     try:
+        # Create backup first
+        backup_file = backup_data()
+        st.info(f"Created backup at: {backup_file}")
+        
+        # Now load the new data
         df = pd.read_csv("scored_physicians.csv")
+        
+        # Validate required columns
+        required_columns = [
+            'npi', 'full_name', 'primary_specialty', 'license_states',
+            'multi_state_licensed', 'locum_candidate_flag', 'recruiter_priority_score'
+        ]
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            st.error(f"Missing required columns: {', '.join(missing_columns)}")
+            st.stop()
+            
     except FileNotFoundError:
         st.error("Error: The file 'scored_physicians.csv' was not found.")
         st.stop()
