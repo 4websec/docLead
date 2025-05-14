@@ -1,4 +1,3 @@
-
 import pandas as pd
 import streamlit as st
 
@@ -102,6 +101,18 @@ if dark_mode:
             background-color: #262626 !important;
             color: #ffffff !important;
         }
+        .dataframe {
+            background-color: #262626 !important;
+            color: #ffffff !important;
+        }
+        .dataframe th {
+            background-color: #363636 !important;
+            color: #ffffff !important;
+        }
+        .dataframe td {
+            background-color: #262626 !important;
+            color: #ffffff !important;
+        }
         </style>
     """, unsafe_allow_html=True)
 
@@ -146,7 +157,6 @@ if "flagged" not in st.session_state:
 
 # --- Header ---
 st.title("🩺 DocHunter - Recruiter Intelligence Dashboard")
-st.markdown("*Developed by Landon Mayo*")
 st.markdown("*Developed by Landon Mayo*")
 st.caption("Curated and scored for recruiter targeting")
 
@@ -194,11 +204,8 @@ if st.session_state.flagged:
 st.markdown("---")
 st.markdown("© 2025 Landon Mayo. All rights reserved.")
 st.markdown("🔧 Built with ❤️ by Landon Mayo. Contact [support@dochunter.ai](mailto:support@dochunter.ai) for access.")
-st.markdown("© 2025 Landon Mayo. All rights reserved.")
 
-
-import streamlit.components.v1 as components
-
+# Chat Widget
 import streamlit.components.v1 as components
 
 components.html("""
@@ -214,4 +221,4 @@ components.html("""
     if (d.head) d.head.appendChild(s);
 })(document, window, 'Chatra');
 </script>
-""", height=0)
+""", height=100)
